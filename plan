@@ -1,3 +1,3 @@
-1. figure out what measures the papers use
-2. use bctwrapper to generate a bunch of fuckass measures for full/pos/neg fcs
-3. train linear models to predict autism score with each of the fuckass measures individually
+1. train linear models to predict autism score with each of the fuckass measures individually
+2. probably do some joint models as well idk how to do statistics tbh
+3. try to do some of what the papers do, generate additional measures if needed
