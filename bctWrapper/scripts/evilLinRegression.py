@@ -1,59 +1,70 @@
 import os
 import sys
 
-# Import libraries.
 import helpers 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.stats import pearsonr
 import seaborn as sns
-# Import train_test_split.
+
 from sklearn.model_selection import train_test_split
-# Import StandardScaler.
 from sklearn.preprocessing import StandardScaler
-# Import LinearRegression.
 from sklearn.linear_model import LinearRegression
-# Import metrics.
 from sklearn.metrics import mean_squared_error, r2_score
 
-from sklearn.datasets import fetch_california_housing
+from sklearn.tree import DecisionTreeClassifier
 
 def trainModel(X, y):
-    # Split the dataset into training (80%) and testing (20%) sets.
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-    # Instantiate StandardScaler.
     scaler = StandardScaler()
-
-    # Fit and transform training data.
     X_train_scaled = scaler.fit_transform(X_train)
-
-    # Also transform test data.
     X_test_scaled = scaler.transform(X_test)
-
-    # Instantiate linear regression model.
     model = LinearRegression()
-
-    # Fit the model to the training data.
     model.fit(X_train_scaled, y_train)
-
-    # Make predictions on the testing data.
     y_pred = model.predict(X_test_scaled)
 
-    # Calculate and print R^2 score.
     r2 = r2_score(y_test, y_pred)
     print(f"\nR-squared: {r2:.4f}")
 
-    # Calculate and print MSE.
     mse = mean_squared_error(y_test, y_pred)
     print(f"Mean squared error: {mse:.4f}")
 
-    # Calculate and print RMSE.
     rmse = mse ** 0.5
     print(f"Root mean squared error: {rmse:.4f}\n")
 
     return r2
+
+def trainTree(X, y):
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
+    model = DecisionTreeClassifier()
+    model.fit(X_train_scaled, y_train)
+    y_pred = model.predict(X_test_scaled)
+
+    true_pos = sum(y_pred[i] == 1 and y_test[i] == 1 for i in range(len(y_test)))
+    predicted_pos = sum(y_pred[i] == 1 for i in range(len(y_pred)))
+    actual = sum(y_test[i] == 1 for i in range(len(y_test)))
+
+    precision = true_pos / predicted_pos
+    print(f"Precision: {precision:.4f}")
+
+    recall = true_pos / actual
+    print(f"Recall: {recall:.4f}")
+
+    F = 2*precision*recall / (precision+recall)
+    print(f"F-measure: {F:.4f}")
+
+    accuracy = sum(y_pred[i] == y_test[i] for i in range(len(y_test))) / len(y_test)
+    print(f"Accuracy: {accuracy:.4f}")
+
+    mse = mean_squared_error(y_test, y_pred)
+    print(f"Mean squared error: {mse:.4f}")
+
+    rmse = mse ** 0.5
+    print(f"Root mean squared error: {rmse:.4f}\n")
 
 def plotCorrelation(X, y, feature, score):
     try:
@@ -80,29 +91,31 @@ if len(sys.argv) != 3:
     sys.exit()
 
 if __name__ == "__main__":
-    #housing = fetch_california_housing()
-
-    #XTEST = pd.DataFrame(housing.data, columns=housing.feature_names)[["AveRooms"]]
-    #yTEST = housing.target  # Median house value in $100,000s
-
-    #print("Housing X: \n", XTEST)
-    #print("Housing Y: \n", yTEST)
-
     # RUN THIS COMMAND 
     # python evilLinRegression.py ..\src\rois_aal\scores.csv ..\src\rois_aal\demographics.csv            
 
     featuresList = pd.read_csv(sys.argv[1]).columns.tolist()[1:]
     graphTheoryMeasures = pd.read_csv(sys.argv[1])
 
+    X = pd.DataFrame(graphTheoryMeasures)
+    score = getColumnFromCSV(sys.argv[2], 'DSM_IV_TR')
+    y = score.values.tolist()
+
+    trainTree(X, y)
+
+    '''
     demographics = ["FIQ", "PIQ", "AGE_AT_SCAN", "SEX", "VIQ", "ADOS_MODULE", "ADOS_TOTAL", "ADOS_COMM", "ADOS_SOCIAL", "ADOS_STEREO_BEHAV"]
 
     posCorr = []
     posCorr2 = []
     for demo in demographics:
-        numSubjects = 170
-        if "ADOS" in demo:
-            numSubjects = 70
+        numSubjects = 171
         score = getColumnFromCSV(sys.argv[2], demo)
+        X = pd.DataFrame(graphTheoryMeasures)
+        y = score.values.tolist()[:numSubjects]
+
+        r2 = trainModel(X, y)
+
         for feature in featuresList:
             if (feature == "AGE_AT_SCAN" or feature == "SEX"): continue
             print(feature)
@@ -116,14 +129,10 @@ if __name__ == "__main__":
             #print("GT y: \n", y)
 
             r2 = trainModel(X, y)
+            plotCorrelation(X.values.flatten().tolist(), y, feature, demo)
             if r2 > .015:
                 posCorr.append(f'GT Measure: {feature}, demographic: {demo}, r2: {r2:.4f}')
                 posCorr2.append(f'{r2:.4f}')
-                plotCorrelation(X.values.flatten().tolist(), y, feature, demo)
-    
     print(posCorr)
     print(posCorr2)
-
-
-        
-
+        '''
