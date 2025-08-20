@@ -88,6 +88,9 @@ if __name__ == "__main__":
     #print("Housing X: \n", XTEST)
     #print("Housing Y: \n", yTEST)
 
+    # RUN THIS COMMAND 
+    # python evilLinRegression.py ..\src\rois_aal\scores.csv ..\src\rois_aal\demographics.csv            
+
     featuresList = pd.read_csv(sys.argv[1]).columns.tolist()[1:]
     graphTheoryMeasures = pd.read_csv(sys.argv[1])
 
