@@ -11,9 +11,12 @@ import seaborn as sns
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import mean_squared_error, r2_score
 
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.ensemble import HistGradientBoostingClassifier
 
 def trainModel(X, y):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
@@ -40,31 +43,35 @@ def trainTree(X, y):
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
-    model = DecisionTreeClassifier()
-    model.fit(X_train_scaled, y_train)
-    y_pred = model.predict(X_test_scaled)
+    for i in [LogisticRegression, HistGradientBoostingClassifier, DecisionTreeClassifier, GaussianNB]:
+        print(i.__name__)
+        model = i()
+        model.fit(X_train_scaled, y_train)
+        y_pred = model.predict(X_test_scaled)
+        print([int(i) for i in y_pred])
+        print(y_test)
 
-    true_pos = sum(y_pred[i] == 1 and y_test[i] == 1 for i in range(len(y_test)))
-    predicted_pos = sum(y_pred[i] == 1 for i in range(len(y_pred)))
-    actual = sum(y_test[i] == 1 for i in range(len(y_test)))
+        true_pos = sum(y_pred[i] == 1 and y_test[i] == 1 for i in range(len(y_test)))
+        predicted_pos = sum(y_pred[i] == 1 for i in range(len(y_pred)))
+        actual = sum(y_test[i] == 1 for i in range(len(y_test)))
 
-    precision = true_pos / predicted_pos
-    print(f"Precision: {precision:.4f}")
+        precision = true_pos / predicted_pos
+        print(f"Precision: {precision:.4f}")
 
-    recall = true_pos / actual
-    print(f"Recall: {recall:.4f}")
+        recall = true_pos / actual
+        print(f"Recall: {recall:.4f}")
 
-    F = 2*precision*recall / (precision+recall)
-    print(f"F-measure: {F:.4f}")
+        F = 2*precision*recall / (precision+recall)
+        print(f"F-measure: {F:.4f}")
 
-    accuracy = sum(y_pred[i] == y_test[i] for i in range(len(y_test))) / len(y_test)
-    print(f"Accuracy: {accuracy:.4f}")
+        accuracy = sum(y_pred[i] == y_test[i] for i in range(len(y_test))) / len(y_test)
+        print(f"Accuracy: {accuracy:.4f}")
 
-    mse = mean_squared_error(y_test, y_pred)
-    print(f"Mean squared error: {mse:.4f}")
+        mse = mean_squared_error(y_test, y_pred)
+        print(f"Mean squared error: {mse:.4f}")
 
-    rmse = mse ** 0.5
-    print(f"Root mean squared error: {rmse:.4f}\n")
+        rmse = mse ** 0.5
+        print(f"Root mean squared error: {rmse:.4f}\n")
 
 def plotCorrelation(X, y, feature, score):
     try:
@@ -94,10 +101,10 @@ if __name__ == "__main__":
     # RUN THIS COMMAND 
     # python evilLinRegression.py ..\src\rois_aal\scores.csv ..\src\rois_aal\demographics.csv            
 
-    featuresList = pd.read_csv(sys.argv[1]).columns.tolist()[1:]
-    graphTheoryMeasures = pd.read_csv(sys.argv[1])
+    #featuresList = pd.read_csv(sys.argv[1]).columns.tolist()[1:]
 
-    X = pd.DataFrame(graphTheoryMeasures)
+    X = [np.genfromtxt('../connectomes/rois_aal/'+i, delimiter=',').flatten() for i in sorted(os.listdir('../connectomes/rois_aal/'))] #pd.read_csv(sys.argv[1], header=0, index_col=False)
+    print(X)
     score = getColumnFromCSV(sys.argv[2], 'DSM_IV_TR')
     y = score.values.tolist()
 
