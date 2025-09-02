@@ -16,34 +16,81 @@ from sklearn.metrics import mean_squared_error, r2_score
 
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.naive_bayes import GaussianNB
-from sklearn.ensemble import HistGradientBoostingClassifier
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.svm import SVR
+from xgboost.sklearn import XGBRegressor
+from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.neural_network import MLPClassifier
+
+from sklearn.decomposition import PCA
+from sklearn.model_selection import KFold
+from sklearn.model_selection import cross_val_score
+kf = KFold(n_splits=10, shuffle=True, random_state=0)
+
+# from https://www.geeksforgeeks.org/machine-learning/cross-validation-using-k-fold-with-scikit-learn/#kfold-with-scikitlearn
+def cross_validation(reg_model, housing_prepared, housing_labels, cv):
+    scores = cross_val_score(
+      reg_model, housing_prepared,
+      housing_labels,
+      scoring="neg_mean_squared_error", cv=cv)
+    rmse_scores = np.sqrt(-scores)
+    print("Scores:", rmse_scores)
+    print("Mean:", rmse_scores.mean())
+    print("StandardDeviation:", rmse_scores.std())
 
 def trainModel(X, y):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     scaler = StandardScaler()
+    pca = PCA(n_components=10)
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
-    model = LinearRegression()
-    model.fit(X_train_scaled, y_train)
-    y_pred = model.predict(X_test_scaled)
+    X_train_pca = pca.fit_transform(X_train_scaled)
+    X_test_pca = pca.fit_transform(X_test_scaled)
 
-    r2 = r2_score(y_test, y_pred)
-    print(f"\nR-squared: {r2:.4f}")
+    for i in [LinearRegression, SVR, GradientBoostingRegressor]:
+        print(i.__name__)
+        model = i()
+        cross_validation(model, X_train_scaled, y_train, kf)
+        model.fit(X_train_scaled, y_train)
+        y_pred = model.predict(X_test_scaled)
 
-    mse = mean_squared_error(y_test, y_pred)
-    print(f"Mean squared error: {mse:.4f}")
+        r2 = r2_score(y_test, y_pred)
+        print(f"\nR-squared: {r2:.4f}")
 
-    rmse = mse ** 0.5
-    print(f"Root mean squared error: {rmse:.4f}\n")
+        mse = mean_squared_error(y_test, y_pred)
+        print(f"Mean squared error: {mse:.4f}")
 
-    return r2
+        rmse = mse ** 0.5
+        print(f"Root mean squared error: {rmse:.4f}\n")
+
+        if i == LinearRegression:
+            np.savetxt('weights_orig.csv', np.reshape(model.coef_, (116, 116)), delimiter=',')
+
+    for i in [LinearRegression, SVR, GradientBoostingRegressor]:
+        print(i.__name__)
+        model = i()
+        cross_validation(model, X_train_pca, y_train, kf)
+        model.fit(X_train_pca, y_train)
+        y_pred = model.predict(X_test_scaled)
+
+        r2 = r2_score(y_test, y_pred)
+        print(f"\nR-squared: {r2:.4f}")
+
+        mse = mean_squared_error(y_test, y_pred)
+        print(f"Mean squared error: {mse:.4f}")
+
+        rmse = mse ** 0.5
+        print(f"Root mean squared error: {rmse:.4f}\n")
+
+        if i == LinearRegression:
+            np.savetxt('weights_pca.csv', np.reshape(model.coef_, (116, 116)), delimiter=',')
 
 def trainTree(X, y):
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
-    for i in [LogisticRegression, HistGradientBoostingClassifier, DecisionTreeClassifier, GaussianNB]:
+    for i in [LogisticRegression, GradientBoostingClassifier, DecisionTreeClassifier, GaussianNB, MLPClassifier]:
         print(i.__name__)
         model = i()
         model.fit(X_train_scaled, y_train)
@@ -104,14 +151,25 @@ if __name__ == "__main__":
     #featuresList = pd.read_csv(sys.argv[1]).columns.tolist()[1:]
 
     X = [np.genfromtxt('../connectomes/rois_aal/'+i, delimiter=',').flatten() for i in sorted(os.listdir('../connectomes/rois_aal/'))] #pd.read_csv(sys.argv[1], header=0, index_col=False)
-    print(X)
     score = getColumnFromCSV(sys.argv[2], 'DSM_IV_TR')
     y = score.values.tolist()
 
     trainTree(X, y)
 
+    y2 = getColumnFromCSV(sys.argv[2], 'ADOS_TOTAL').values.tolist()
+
+    #trainModel(X, y2)
+
+    X2 = [[np.var(row)] for row in np.genfromtxt('../features/strength_interHemisphere.txt')]
+
+    #trainModel(X2, y2)
+    #trainTree(X2, y)
+
     '''
     demographics = ["FIQ", "PIQ", "AGE_AT_SCAN", "SEX", "VIQ", "ADOS_MODULE", "ADOS_TOTAL", "ADOS_COMM", "ADOS_SOCIAL", "ADOS_STEREO_BEHAV"]
+
+    featuresList = pd.read_csv(sys.argv[1]).columns.tolist()[1:]
+    graphTheoryMeasures = pd.read_csv(sys.argv[1])
 
     posCorr = []
     posCorr2 = []
