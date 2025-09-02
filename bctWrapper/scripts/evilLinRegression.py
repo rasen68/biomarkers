@@ -141,8 +141,8 @@ def getColumnFromCSV(file_path, col_name):
     
     return df[col_name]
 
-if len(sys.argv) != 3:
-    sys.exit()
+#if len(sys.argv) != 3:
+#    sys.exit()
 
 if __name__ == "__main__":
     # RUN THIS COMMAND 
@@ -150,6 +150,15 @@ if __name__ == "__main__":
 
     #featuresList = pd.read_csv(sys.argv[1]).columns.tolist()[1:]
 
+    varianceFile = pd.read_csv(sys.argv[1])
+
+    variance = pd.DataFrame(varianceFile)[["variance"]]
+    ADOS = getColumnFromCSV(sys.argv[1], "ADOS_TOTAL")
+
+    r2 = trainModel(variance, ADOS)
+    print(r2)
+
+    '''
     X = [np.genfromtxt('../connectomes/rois_aal/'+i, delimiter=',').flatten() for i in sorted(os.listdir('../connectomes/rois_aal/'))] #pd.read_csv(sys.argv[1], header=0, index_col=False)
     score = getColumnFromCSV(sys.argv[2], 'DSM_IV_TR')
     y = score.values.tolist()
@@ -166,6 +175,7 @@ if __name__ == "__main__":
     #trainTree(X2, y)
 
     '''
+
     demographics = ["FIQ", "PIQ", "AGE_AT_SCAN", "SEX", "VIQ", "ADOS_MODULE", "ADOS_TOTAL", "ADOS_COMM", "ADOS_SOCIAL", "ADOS_STEREO_BEHAV"]
 
     featuresList = pd.read_csv(sys.argv[1]).columns.tolist()[1:]
