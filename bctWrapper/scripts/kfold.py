@@ -42,7 +42,7 @@ for i in [LinearRegression, SVR, GradientBoostingRegressor, MLPRegressor]:
 for i in [LogisticRegression, SVC, GradientBoostingClassifier, GaussianNB, MLPClassifier]:
     print(i.__name__)
     model = i()
-    cross_validation(model, X_pca, y_reg, kf)
+    cross_validation(model, X_pca, y_class, kf)
 
 ''' Help choose # components
 print("Cumulative:", cums := np.cumsum(pca.explained_variance_ratio_))
