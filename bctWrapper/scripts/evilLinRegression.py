@@ -18,7 +18,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.svm import SVR
-from xgboost.sklearn import XGBRegressor
+#from xgboost.sklearn import XGBRegressor
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.neural_network import MLPClassifier
 
@@ -37,6 +37,42 @@ def cross_validation(reg_model, housing_prepared, housing_labels, cv):
     print("Scores:", rmse_scores)
     print("Mean:", rmse_scores.mean())
     print("StandardDeviation:", rmse_scores.std())
+
+def trainModelZero(X, y):
+    # Split the dataset into training (80%) and testing (20%) sets.
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    # Instantiate StandardScaler.
+    scaler = StandardScaler()
+
+    # Fit and transform training data.
+    X_train_scaled = scaler.fit_transform(X_train)
+
+    # Also transform test data.
+    X_test_scaled = scaler.transform(X_test)
+
+    # Instantiate linear regression model.
+    model = LinearRegression()
+
+    # Fit the model to the training data.
+    model.fit(X_train_scaled, y_train)
+
+    # Make predictions on the testing data.
+    y_pred = model.predict(X_test_scaled)
+
+    # Calculate and print R^2 score.
+    r2 = r2_score(y_test, y_pred)
+    print(f"\nR-squared: {r2:.4f}")
+
+    # Calculate and print MSE.
+    mse = mean_squared_error(y_test, y_pred)
+    print(f"Mean squared error: {mse:.4f}")
+
+    # Calculate and print RMSE.
+    rmse = mse ** 0.5
+    print(f"Root mean squared error: {rmse:.4f}\n")
+
+    return r2
 
 def trainModel(X, y):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
@@ -155,7 +191,7 @@ if __name__ == "__main__":
     variance = pd.DataFrame(varianceFile)[["variance"]]
     ADOS = getColumnFromCSV(sys.argv[1], "ADOS_TOTAL")
 
-    r2 = trainModel(variance, ADOS)
+    r2 = trainModelZero(variance, ADOS)
     print(r2)
 
     '''
@@ -174,7 +210,7 @@ if __name__ == "__main__":
     #trainModel(X2, y2)
     #trainTree(X2, y)
 
-    '''
+
 
     demographics = ["FIQ", "PIQ", "AGE_AT_SCAN", "SEX", "VIQ", "ADOS_MODULE", "ADOS_TOTAL", "ADOS_COMM", "ADOS_SOCIAL", "ADOS_STEREO_BEHAV"]
 
