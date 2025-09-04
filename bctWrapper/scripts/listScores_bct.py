@@ -42,11 +42,14 @@ globalMeasures=["degree_avg","degree_interHemisphere_avg","degree_intraHemispher
                 "strength_global","strength_global_offDiagonal","strength_interHemisphere_global","strength_intraHemisphere_global","strength_selfConnections_global",
                 "node_betweenness_centrality_avg","eigenvector_centrality_avg","participation_coefficient_avg",
                 "clustering_coefficient_avg","clustering_coefficient_zhang_avg","eccentricity_avg",
-                "small_worldness","characteristic_path_length","global_efficiency","radius","diameter","modularity_global","assortativity","density",
+                "small_worldness","characteristic_path_length","global_efficiency","radius","diameter","density",
                 "degree_neg_avg","degree_interHemisphere_neg_avg","degree_intraHemisphere_neg_avg","degree_withinModule_neg_avg","degree_betweenModule_neg_avg",
                 "strength_global_neg","strength_global_offDiagonal_neg","strength_interHemisphere_global_neg","strength_intraHemisphere_global_neg",
                 "participation_coefficient_pos_avg","participation_coefficient_neg_avg","clustering_coefficient_neg_avg","clustering_coefficient_zhang_neg_avg","modularity_global_neg"]
                 
+#"modularity_global"
+#"assortativity",
+
 #########load list of graph theory measures to be calculated
 with open(measuresListPath) as fl:
     loaded = fl.read().splitlines()
