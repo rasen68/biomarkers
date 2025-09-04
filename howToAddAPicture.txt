@@ -1,0 +1,6 @@
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{your_image_file.png}
+    \caption{An example caption for the figure.}
+    \label{fig:example}
+\end{figure}

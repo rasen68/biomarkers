@@ -2,6 +2,11 @@ import numpy as np
 import pandas as pd
 import random
 import csv
+from scipy.stats import ttest_ind
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+
 
 import os
 import sys
@@ -39,9 +44,25 @@ for file in os.listdir(connectomes):
 
 filename = "NYU_variance_test_abc.csv"
 
+group1 = variance[73:]
+group2 = variance[:73]
+t_stat, p_value = ttest_ind(group1, group2, equal_var = False)
+print(t_stat)
+print(p_value)
+
+# Plot results
+plt.figure(figsize=(6,4))
+sns.violinplot(data=[group1, group2])
+sns.swarmplot(data=[group1, group2], color=".25")
+plt.xticks([0,1], ["ASD", "Control"])
+plt.ylabel("Variance")
+plt.show()
+
+'''
 with open(filename, "w", newline="") as f:
     writer = csv.writer(f)
     writer.writerow(["subject", "variance","=AVERAGE(B2, B74)","=AVERAGE(B75, B172)"])   # header row (optional)
     for a, b in zip(subjects, variance):
         writer.writerow([a, b])
 
+'''
