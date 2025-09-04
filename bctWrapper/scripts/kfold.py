@@ -5,6 +5,8 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.model_selection import KFold
 from sklearn.model_selection import cross_val_score
+from sklearn.feature_selection import SelectKBest, f_regression
+
 
 from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.svm import SVR, SVC
@@ -23,26 +25,28 @@ def cross_validation(reg_model, housing_prepared, housing_labels, cv):
     print("Mean:", rmse_scores.mean())
     print("StandardDeviation:", rmse_scores.std())
 
-X = [np.genfromtxt('../connectomes/rois_aal/'+i, delimiter=',').flatten() for i in sorted(os.listdir('../connectomes/rois_aal/'))]
+X = [np.genfromtxt('../connectomes/all/'+i, delimiter=',').flatten() for i in sorted(os.listdir('../connectomes/all/'))]
 df = pd.read_csv('../src/rois_aal/demographics.csv')
 y_class = df['DSM_IV_TR'].values.tolist()
 y_reg = df['ADOS_TOTAL'].values.tolist()
 
-X_scaled = StandardScaler().fit_transform(X)
-components = 70
-pca = PCA(n_components=components, whiten=True).fit(X_scaled)
-X_pca = pca.transform(X_scaled)
+for k in range(50, 200, 5):
+    print()
+    print()
+    print(k)
+    print()
+    print()
+    X_scaled = StandardScaler().fit_transform(X)
+    selecter = SelectKBest(f_regression, k=k)
+    X_kbest = selecter.fit_transform(X_scaled, y_reg)
 
-kf = KFold(n_splits=5, shuffle=True, random_state=0)
-for i in [LinearRegression, SVR, GradientBoostingRegressor, MLPRegressor]:
-    print(i.__name__)
-    model = i()
-    cross_validation(model, X_pca, y_reg, kf)
-
-for i in [LogisticRegression, SVC, GradientBoostingClassifier, GaussianNB, MLPClassifier]:
-    print(i.__name__)
-    model = i()
-    cross_validation(model, X_pca, y_class, kf)
+    kf = KFold(n_splits=5, shuffle=True, random_state=0)
+    for i in [LinearRegression, SVR, GradientBoostingRegressor]:
+        print(i.__name__)
+        model = i()
+        if i.__name__ == 'GradientBoostingRegressor':
+            model = i(learning_rate=0.01, max_depth=3)
+        cross_validation(model, X_kbest, y_reg, kf)
 
 ''' Help choose # components
 print("Cumulative:", cums := np.cumsum(pca.explained_variance_ratio_))
