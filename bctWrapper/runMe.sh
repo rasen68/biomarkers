@@ -3,7 +3,7 @@
 # Note that, depending on the dataset that you will run this script on, you might need to change the variable definitions below
 
 experimentPath=.
-dataset=rois_aal #TBI #make sure to put the name of the dataset correct here. Script will look for folder named with this name under "connectomes" and "src" folders
+dataset=rois_aal_NYU_Altered #TBI #make sure to put the name of the dataset correct here. Script will look for folder named with this name under "connectomes" and "src" folders
 measuresList=$experimentPath/src/featureList.txt
 connectomesFolder=$experimentPath/connectomes/$dataset
 samplePath=$experimentPath/src/$dataset/subjects.txt
@@ -11,7 +11,7 @@ systemMaps=$experimentPath/src/$dataset/systemsMap.txt
 hemisphereMaps=$experimentPath/src/$dataset/hemisphereMap.txt
 numNodes=116 #86 #make sure that his number is the same as the number of nodes in the connectomes
 
-python=python3 #you might need to change this if the python binary has name python or py on your machine rather than python3
+python=python #you might need to change this if the python binary has name python or py on your machine rather than python3
 
 bct_features_py=./scripts/bct_features.py
 
