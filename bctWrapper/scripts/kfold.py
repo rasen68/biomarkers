@@ -31,11 +31,7 @@ y_class = df['DSM_IV_TR'].values.tolist()
 y_reg = df['ADOS_TOTAL'].values.tolist()
 
 for k in range(50, 200, 5):
-    print()
-    print()
-    print(k)
-    print()
-    print()
+    print("Feature selection k = ", k)
     X_scaled = StandardScaler().fit_transform(X)
     selecter = SelectKBest(f_regression, k=k)
     X_kbest = selecter.fit_transform(X_scaled, y_reg)

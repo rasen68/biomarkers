@@ -5,9 +5,9 @@ import random
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.model_selection import train_test_split, StratifiedKFold
-from sklearn.feature_selection import SelectKBest, f_classif
+from sklearn.feature_selection import SelectKBest, f_classif, f_regression
 from sklearn.ensemble import GradientBoostingRegressor, GradientBoostingClassifier
-from sklearn.svm import SVC
+from sklearn.svm import SVC, SVR
 from sklearn.linear_model import LogisticRegression
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 
@@ -18,17 +18,9 @@ X_big = [np.genfromtxt('../connectomes/all/' + i, delimiter=',') for i in sorted
 X = [[big[b[0]][b[1]] for b in zip(left, right)] for big in X_big]
 print(len(X[0]))
 '''
-X = [np.genfromtxt('../connectomes/all/' + i, delimiter=',') for i in sorted(os.listdir('../connectomes/all'))]
-r = c = 58
-X12 = [Xi[:r, c:] for Xi in X]
-X21 = [Xi[r:, :c] for Xi in X]
-d12 = [np.diag(X) for X in X12]
-d21 = [np.diag(X) for X in X21]
-d = [np.concatenate([d[0], d[1]]) for d in zip(d12, d21)]
-v = [np.var(di, ddof=1) for di in d]
-X = np.array(v).reshape(-1, 1)
-
+X = [np.genfromtxt('../connectomes/rois_aal_NYU/' + i, delimiter=',').flatten() for i in sorted(os.listdir('../connectomes/rois_aal_NYU'))]
 df = pd.read_csv('../src/rois_aal/demographics.csv')
+df = df[df['SITE_ID'] == 'NYU']
 y_class = df['DSM_IV_TR'].values.tolist()
 y_reg = df['ADOS_TOTAL'].values.tolist()
 
@@ -36,15 +28,13 @@ scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 X_final = X_scaled
 
-'''
-selecter = SelectKBest(f_classif, k=i)
+selecter = SelectKBest(f_classif, k=84)
 X_kbest = selecter.fit_transform(X_scaled, y_class)
 print(selecter.get_feature_names_out())
 
 pca = PCA(n_components=72, whiten=True).fit(X_scaled)
 X_pca = pca.transform(X_scaled)
 X_final = X_kbest
-'''
 
 folds = 5
 lr = 0.01
@@ -57,11 +47,12 @@ for i in range(folds):
     model.fit(X_train, y_train)
     training_scores.append(model.score(X_train, y_train))
     val_scores.append(model.score(X_test, y_test))
+    print(y_test[:10])
+    print([round(float(y), 1) for y in model.predict(X_test)[:20]])
     #print(model.coef_[0])
 print("Mean accuracy score (training): {0:.3f}".format(float(np.mean(training_scores))))
 print("{0:.3f}".format(float(np.mean(val_scores))))
 print("Validation scores:", [round(float(i), 3) for i in val_scores])
-
 
 '''
 lrs = [0.01]#, 0.05, 0.08, 0.1, 0.15, 0.2, 0.25]

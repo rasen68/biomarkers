@@ -6,16 +6,13 @@ import sys
 import csv
 import os
 
-featuresList = pd.read_csv(sys.argv[1]).columns.tolist()[1:]
+featuresList = ['modularity'] #pd.read_csv(sys.argv[1]).columns.tolist()[1:]
 graphTheoryMeasures = pd.read_csv(sys.argv[1])
 
 tVals = []
 pVals = []
 
 for feature in featuresList:
-    if "neg" in feature:
-        continue
-    subjects = pd.DataFrame(graphTheoryMeasures[["ID"]]).values.flatten().tolist()
     asdGTMeasure = pd.DataFrame(graphTheoryMeasures)[[feature]][:73].values.flatten().tolist()
     controlGTMeasure = pd.DataFrame(graphTheoryMeasures)[[feature]][73:].values.flatten().tolist()
 
@@ -27,7 +24,6 @@ for feature in featuresList:
     print("p value:", p_value, "\n")
     tVals.append(t_stat)
     pVals.append(p_value)
-    
 
 with open("ttest_new.csv", "w", newline="") as f:
     writer = csv.writer(f)
